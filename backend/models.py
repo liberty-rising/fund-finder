@@ -14,17 +14,6 @@ class Business(Base):
     annual_revenue = Column(Float)
 
 
-class Opportunity(Base):
-    __tablename__ = "opportunities"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    type = Column(String, index=True)  # grant, tender, or loan
-    description = Column(String)
-    amount = Column(Float)
-    eligibility_criteria = Column(String)
-
-
 class EUFT(Base):
     __tablename__ = "eu_funding_tenders"
 
@@ -32,9 +21,14 @@ class EUFT(Base):
     identifier = Column(String, unique=True, index=True)
     title = Column(String)
     description = Column(String)
+    keywords = Column(String, nullable=True)  # Stored as comma-separated string
+    fund_type = Column(String)
+    links = Column(String)
     status = Column(String)
     call_identifier = Column(String)
     topic_identifier = Column(String)
-    publication_date = Column(DateTime, nullable=True)
+    topic_conditions = Column(String)
+    budget = Column(String)
+    start_date = Column(DateTime, nullable=True)
     deadline_date = Column(DateTime, nullable=True)
     last_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())

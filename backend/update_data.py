@@ -19,11 +19,11 @@ def update_grants_tenders():
                 grant_tender = EUFTCreate(
                     identifier=metadata.get("identifier", [""])[0],
                     title=item.get("title") or metadata.get("title", [""])[0],
-                    description=item.get("summary") or "",
+                    description=item.get("descriptionByte") or "",
                     status=metadata.get("status", [""])[0],
                     call_identifier=metadata.get("callIdentifier", [""])[0],
                     topic_identifier=metadata.get("identifier", [""])[0],
-                    publication_date=parse_date(metadata.get("startDate", [""])[0]),
+                    start_date=parse_date(metadata.get("startDate", [""])[0]),
                     deadline_date=parse_date(
                         metadata.get("deadlineDate", [""])[0]
                         if metadata.get("deadlineDate")

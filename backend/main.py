@@ -46,17 +46,6 @@ def delete_business(business_id: int, db: Session = Depends(get_db)):
     return db_business
 
 
-@app.get("/opportunities/", response_model=list[schemas.Opportunity])
-def read_opportunities(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    opportunities = crud.get_opportunities(db, skip=skip, limit=limit)
-    return opportunities
-
-
-@app.post("/match/", response_model=list[schemas.Opportunity])
-def match_opportunities(business_id: int, db: Session = Depends(get_db)):
-    return crud.match_opportunities(db, business_id=business_id)
-
-
 @app.post("/update-data/")
 async def update_data(background_tasks: BackgroundTasks):
     background_tasks.add_task(update_grants_tenders)
