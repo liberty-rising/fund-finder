@@ -6,13 +6,3 @@ services:
       - ./backend:/app
     ports:
       - "8080:8080"
-  # frontend:
-  #   build: ./frontend
-  #   volumes:
-  #     - ./frontend:/app
-  #   ports:
-  #     - "8501:8501"
-  #   environment:
-  #     - WATCHDOG_TIMEOUT=10
-  #   depends_on:
-  #     - backend
