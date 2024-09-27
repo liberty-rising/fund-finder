@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 import crud, models, schemas
 from database import SessionLocal, engine
 from update_data import update_grants_tenders
@@ -47,9 +47,13 @@ def delete_business(business_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/update-data/")
-async def update_data(background_tasks: BackgroundTasks):
-    background_tasks.add_task(update_grants_tenders)
-    return {"message": "Data update started in the background"}
+async def update_data(
+    background_tasks: BackgroundTasks, max_items: Optional[int] = 100
+):
+    background_tasks.add_task(update_grants_tenders, max_items)
+    return {
+        "message": f"Data update started in the background. Max items: {max_items if max_items else 'All'}"
+    }
 
 
 @app.get("/grants-tenders/", response_model=List[schemas.EUFT])
@@ -61,3 +65,9 @@ def read_grants_tenders(skip: int = 0, limit: int = 100, db: Session = Depends(g
         )
         for grant_tender in grants_tenders
     ]
+
+
+@app.delete("/grants-tenders/")
+def delete_all_grants_tenders(db: Session = Depends(get_db)):
+    deleted_count = crud.delete_all_grants_tenders(db)
+    return {"message": f"Deleted {deleted_count} grants and tenders"}

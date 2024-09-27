@@ -9,7 +9,7 @@ class EUFundingAPIClient:
     def __init__(self):
         self.session = requests.Session()
 
-    def get_grants_and_tenders(self):
+    def get_grants_and_tenders(self, page_number=1, page_size=100):
         query = {
             "bool": {
                 "must": [
@@ -19,12 +19,16 @@ class EUFundingAPIClient:
                 ]
             }
         }
-        return self._make_request(query)
+        return self._make_request(query, page_number, page_size)
 
-    def _make_request(self, query):
+    def _make_request(self, query, page_number, page_size):
         response = self.session.post(
             f"{self.BASE_URL}?apiKey={self.API_KEY}&text=***",
-            data={"query": json.dumps(query)},
+            data={
+                "query": json.dumps(query),
+                "pageSize": page_size,
+                "pageNumber": page_number,
+            },
         )
         response.raise_for_status()
         return response.json()

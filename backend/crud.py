@@ -69,3 +69,9 @@ def delete_business(db: Session, business_id: int):
         db.delete(business)
         db.commit()
     return business
+
+
+def delete_all_grants_tenders(db: Session):
+    deleted_count = db.query(models.EUFT).delete()
+    db.commit()
+    return deleted_count
