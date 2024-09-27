@@ -1,37 +1,35 @@
 import requests
 import json
+import os
 
 
 class EUFundingAPIClient:
     BASE_URL = "https://api.tech.ec.europa.eu/search-api/prod/rest/search"
     API_KEY = "SEDIA"
+    QUERY_FILE_PATH = "euft_search_query.json"
 
     def __init__(self):
         self.session = requests.Session()
 
-    def get_grants_and_tenders(self, page_number=1, page_size=100):
-        query = {
-            "bool": {
-                "must": [
-                    {"terms": {"type": ["0", "1", "2", "8"]}},
-                    {"terms": {"status": ["31094501", "31094502"]}},
-                    {"terms": {"language": ["en"]}},
-                ]
-            }
-        }
-        return self._make_request(query, page_number, page_size)
+    def _make_request(self, page_number, page_size):
+        # Read the entire JSON file content
+        with open(self.QUERY_FILE_PATH, "r") as query_file:
+            query_content = query_file.read()
 
-    def _make_request(self, query, page_number, page_size):
+        # Prepare the files parameter
+        files = {"query": ("query.json", query_content, "application/json")}
+
+        # Prepare other form data
+        data = {"pageSize": str(page_size), "pageNumber": str(page_number)}
+
         response = self.session.post(
-            f"{self.BASE_URL}?apiKey={self.API_KEY}&text=***",
-            data={
-                "query": json.dumps(query),
-                "pageSize": page_size,
-                "pageNumber": page_number,
-            },
+            f"{self.BASE_URL}?apiKey={self.API_KEY}&text=***", files=files, data=data
         )
         response.raise_for_status()
         return response.json()
+
+    def get_grants_and_tenders(self, page_number=1, page_size=100):
+        return self._make_request(page_number, page_size)
 
     # Type definitions:
     # "0": "Tender"

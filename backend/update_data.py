@@ -6,7 +6,7 @@ from schemas import EUFTCreate
 from dateutil import parser
 from datetime import datetime, timezone
 import math
-import logging
+from logger import logger
 
 
 def parse_fund_type(fund_type_code):
@@ -52,7 +52,7 @@ def update_grants_tenders(max_items=None):
                         title=item.get("title") or metadata.get("title", [""])[0],
                         description=item.get("descriptionByte") or "",
                         keywords=", ".join(metadata.get("keywords", [])),
-                        fund_type=parse_fund_type(metadata.get("fundType", [""])[0]),
+                        fund_type=parse_fund_type(metadata.get("type", [""])[0]),
                         links=", ".join(item.get("links", [])),
                         status=parse_status(metadata.get("status", [""])[0]),
                         call_identifier=metadata.get("callIdentifier", [""])[0],
@@ -66,6 +66,7 @@ def update_grants_tenders(max_items=None):
                             else None
                         ),
                     )
+                    logger.info(f"Grant tender: {grant_tender}")
                     create_or_update_grant_tender(db, grant_tender)
                     total_processed += 1
 
@@ -76,10 +77,10 @@ def update_grants_tenders(max_items=None):
                     print(f"Error processing item: {e}")
                     print(f"Problematic item: {item}")
 
-            if page * page_size >= total_results:
+            if page_number * page_size >= total_results:
                 break
 
-            page += 1
+            page_number += 1
 
     except Exception as e:
         print(f"Error fetching or processing data: {e}")
