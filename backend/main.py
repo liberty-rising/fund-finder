@@ -1,22 +1,13 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
+from typing import List
 import crud, models, schemas
 from database import SessionLocal, engine
-from fastapi.middleware.cors import CORSMiddleware
-
+from update_data import update_grants_tenders
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
-)
 
 
 # Dependency
@@ -41,6 +32,12 @@ def read_business(business_id: int, db: Session = Depends(get_db)):
     return db_business
 
 
+@app.get("/businesses/", response_model=list[schemas.Business])
+def read_businesses(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    businesses = crud.get_businesses(db, skip=skip, limit=limit)
+    return businesses
+
+
 @app.get("/opportunities/", response_model=list[schemas.Opportunity])
 def read_opportunities(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     opportunities = crud.get_opportunities(db, skip=skip, limit=limit)
@@ -50,3 +47,20 @@ def read_opportunities(skip: int = 0, limit: int = 100, db: Session = Depends(ge
 @app.post("/match/", response_model=list[schemas.Opportunity])
 def match_opportunities(business_id: int, db: Session = Depends(get_db)):
     return crud.match_opportunities(db, business_id=business_id)
+
+
+@app.post("/update-data/")
+async def update_data(background_tasks: BackgroundTasks):
+    background_tasks.add_task(update_grants_tenders)
+    return {"message": "Data update started in the background"}
+
+
+@app.get("/grants-tenders/", response_model=List[schemas.EUFT])
+def read_grants_tenders(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    grants_tenders = crud.get_grants_tenders(db, skip=skip, limit=limit)
+    return [
+        schemas.EUFT(
+            **{k: v for k, v in grant_tender.__dict__.items() if v is not None}
+        )
+        for grant_tender in grants_tenders
+    ]
