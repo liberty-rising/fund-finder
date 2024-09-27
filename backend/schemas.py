@@ -25,10 +25,15 @@ class EUFTBase(BaseModel):
     identifier: str
     title: str
     description: str
+    keywords: Optional[str] = None
+    fund_type: str
+    links: str
     status: str
     call_identifier: str
     topic_identifier: str
-    publication_date: Optional[datetime] = None
+    topic_conditions: str
+    budget: str
+    start_date: Optional[datetime] = None
     deadline_date: Optional[datetime] = None
 
 

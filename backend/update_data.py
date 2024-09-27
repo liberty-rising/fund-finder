@@ -7,6 +7,26 @@ from dateutil import parser
 from datetime import datetime, timezone
 
 
+def parse_fund_type(fund_type_code):
+    fund_type_mapping = {
+        "0": "Tender",
+        "1": "Grant",
+        "2": "Calls for proposals",
+        "6": "Funding updates",
+        "8": "Cascade funding calls",
+    }
+    return fund_type_mapping.get(fund_type_code, "Unknown")
+
+
+def parse_status(status_code):
+    status_mapping = {
+        "31094501": "Forthcoming",
+        "31094502": "Open for submission",
+        "31094503": "Closed",
+    }
+    return status_mapping.get(status_code, "Unknown")
+
+
 def update_grants_tenders():
     db = SessionLocal()
     api_client = EUFundingAPIClient()
@@ -20,9 +40,14 @@ def update_grants_tenders():
                     identifier=metadata.get("identifier", [""])[0],
                     title=item.get("title") or metadata.get("title", [""])[0],
                     description=item.get("descriptionByte") or "",
-                    status=metadata.get("status", [""])[0],
+                    keywords=", ".join(metadata.get("keywords", [])),
+                    fund_type=parse_fund_type(metadata.get("fundType", [""])[0]),
+                    links=", ".join(item.get("links", [])),
+                    status=parse_status(metadata.get("status", [""])[0]),
                     call_identifier=metadata.get("callIdentifier", [""])[0],
                     topic_identifier=metadata.get("identifier", [""])[0],
+                    topic_conditions=metadata.get("topicConditions", [""])[0],
+                    budget=metadata.get("budget", [""])[0],
                     start_date=parse_date(metadata.get("startDate", [""])[0]),
                     deadline_date=parse_date(
                         metadata.get("deadlineDate", [""])[0]
