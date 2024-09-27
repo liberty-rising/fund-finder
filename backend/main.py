@@ -38,6 +38,14 @@ def read_businesses(skip: int = 0, limit: int = 100, db: Session = Depends(get_d
     return businesses
 
 
+@app.delete("/businesses/{business_id}", response_model=schemas.Business)
+def delete_business(business_id: int, db: Session = Depends(get_db)):
+    db_business = crud.delete_business(db, business_id=business_id)
+    if db_business is None:
+        raise HTTPException(status_code=404, detail="Business not found")
+    return db_business
+
+
 @app.get("/opportunities/", response_model=list[schemas.Opportunity])
 def read_opportunities(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     opportunities = crud.get_opportunities(db, skip=skip, limit=limit)

@@ -59,3 +59,13 @@ def create_or_update_grant_tender(db: Session, grant_tender: schemas.EUFTCreate)
 
 def get_grants_tenders(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.EUFT).offset(skip).limit(limit).all()
+
+
+def delete_business(db: Session, business_id: int):
+    business = (
+        db.query(models.Business).filter(models.Business.id == business_id).first()
+    )
+    if business:
+        db.delete(business)
+        db.commit()
+    return business
